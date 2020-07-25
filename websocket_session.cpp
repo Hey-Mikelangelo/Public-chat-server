@@ -6,9 +6,9 @@
 //
 // Official repository: https://github.com/vinniefalco/CppCon2018
 //
-
 #include "websocket_session.hpp"
 #include <iostream>
+#include "Auth.h"
 
 websocket_session::
 websocket_session(
@@ -57,19 +57,36 @@ on_accept(beast::error_code ec)
             shared_from_this()));
 }
 
+extern SociDb psql;
+
 void
 websocket_session::
 on_read(beast::error_code ec, std::size_t)
 {
+    SociDb* Db = &psql;
+    //psql.ConnectToDB();
     // Handle the error, if any
     if (ec)
         return fail(ec, "read");
 
-    // Send to all connections
-    state_->send(beast::buffers_to_string(buffer_.data()));
+    std::string buffData = beast::buffers_to_string(buffer_.data());
+    std::size_t namePos = 10; //:username:
+    std::size_t passPos = buffData.find(":password:") + 10;
+    std::size_t messPos = buffData.find(":message:") + 9;
 
-    // Clear the buffer
+    std::string username = buffData.substr(10, passPos - 20);
+    std::string password = buffData.substr(passPos, messPos - passPos - 9);
+    std::string message = buffData.substr(messPos);
+
+    //check for user in Db and send message only if exists
+    if (Db->GetUser(username, password)) {
+        std::string response = username + ": " + message;
+        // Send to all connections
+        state_->send(response);
+    }
+    // Clear the buffer  
     buffer_.consume(buffer_.size());
+
 
     // Read another message
     ws_.async_read(

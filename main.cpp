@@ -20,18 +20,27 @@
 
 #include "listener.hpp"
 #include "shared_state.hpp"
-
 #include <boost/asio/signal_set.hpp>
 #include <boost/smart_ptr.hpp>
 #include <iostream>
 #include <vector>
+#include "Auth.h"
+
+SociDb psql;
 
 int
-main(int argc, char* argv[])
+main(int argc, const char* argv[])
 {
+    //Connect to DB
+    psql.ConnectToDB();
     // Check command line arguments.
     if (argc != 5)
     {
+    /*  argv[0] = "ChattingApp.exe";
+        argv[1] = "0.0.0.0";
+        argv[2] = "8080";
+        argv[3] = ".";
+        argv[4] = "5";*/
         std::cerr <<
             "Usage: websocket-chat-multi <address> <port> <doc_root> <threads>\n" <<
             "Example:\n" <<
