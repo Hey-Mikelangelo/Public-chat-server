@@ -5,9 +5,14 @@ Chat server which accepts messages and sends them to all connected users.
 
 Database connection options can be changed in Auth.h file.
 
+
 Dependencies:
+
    SOCI - http://soci.sourceforge.net/
+
    Postgres
+
    Boost library
+
 
 
