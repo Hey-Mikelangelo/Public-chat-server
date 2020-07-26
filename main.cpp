@@ -34,23 +34,19 @@ main(int argc, const char* argv[])
     //Connect to DB
     psql.ConnectToDB();
     // Check command line arguments.
-    if (argc != 5)
+    if (argc != 4)
     {
-    /*  argv[0] = "ChattingApp.exe";
-        argv[1] = "0.0.0.0";
-        argv[2] = "8080";
-        argv[3] = ".";
-        argv[4] = "5";*/
-        std::cerr <<
-            "Usage: websocket-chat-multi <address> <port> <doc_root> <threads>\n" <<
+       std::cerr <<
+            "Usage: websocket-chat-multi <address> <port> <threads>\n" <<
             "Example:\n" <<
-            "    websocket-chat-server 0.0.0.0 8080 . 5\n";
+            "    public-chat-server 0.0.0.0 8080 5\n";
         return EXIT_FAILURE;
     }
     auto address = net::ip::make_address(argv[1]);
     auto port = static_cast<unsigned short>(std::atoi(argv[2]));
-    auto doc_root = argv[3];
-    auto const threads = std::max<int>(1, std::atoi(argv[4]));
+    //not supporting documents
+    auto doc_root = "..";
+    auto const threads = std::max<int>(1, std::atoi(argv[3]));
 
     // The io_context is required for all I/O
     net::io_context ioc;

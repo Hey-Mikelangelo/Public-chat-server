@@ -70,19 +70,40 @@ on_read(beast::error_code ec, std::size_t)
         return fail(ec, "read");
 
     std::string buffData = beast::buffers_to_string(buffer_.data());
-    std::size_t namePos = 10; //:username:
-    std::size_t passPos = buffData.find(":password:") + 10;
-    std::size_t messPos = buffData.find(":message:") + 9;
+    std::string reg = buffData.substr(0, 10);
+    std::string response;
+    std::string username;
+    std::string password;
+    std::size_t namePos;
+    std::size_t passPos;
 
-    std::string username = buffData.substr(10, passPos - 20);
-    std::string password = buffData.substr(passPos, messPos - passPos - 9);
-    std::string message = buffData.substr(messPos);
+    if (reg == ":register:") {
+        namePos = 10; //":register:"
+        passPos = buffData.find(":password:") + 10;
+        username = buffData.substr(10, passPos - 20);
+        password = buffData.substr(passPos);
 
-    //check for user in Db and send message only if exists
-    if (Db->GetUser(username, password)) {
-        std::string response = username + ": " + message;
-        // Send to all connections
-        state_->send(response);
+        //method addUser returns true if username is not user by other person and adds user to DB
+        if (Db->addUser(username, password)) {
+            response = "new user registered: " + username;
+            state_->send(response);
+        }
+    }
+    else {
+        namePos = 10; //:username:
+        passPos = buffData.find(":password:") + 10;
+        std::size_t messPos = buffData.find(":message:") + 9;
+
+        username = buffData.substr(10, passPos - 20);
+        password = buffData.substr(passPos, messPos - passPos - 9);
+        std::string message = buffData.substr(messPos);
+
+        //check for user in Db and send message only if exists
+        if (Db->GetUser(username, password)) {
+            response = username + ": " + message;
+            // Send to all connections
+            state_->send(response);
+        }
     }
     // Clear the buffer  
     buffer_.consume(buffer_.size());
